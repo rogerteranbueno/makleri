@@ -48,15 +48,17 @@
   .l-bg::after{content:"";position:absolute;inset:0;background:
     radial-gradient(120% 80% at 50% 45%, rgba(0,0,0,0) 40%, rgba(60,0,10,.55) 100%),
     linear-gradient(to bottom, rgba(200,24,40,.0) 60%, rgba(120,10,22,.55) 100%);}
-  .hero-inner{position:absolute;inset:0;display:grid;place-items:center;padding:0 20px}
-  .l-head{z-index:2;left:50%;top:55%;transform:translate(-50%,-50%) translate3d(0,var(--y),0);text-align:center;width:100%;pointer-events:none}
-  .l-head .big{font-family:var(--pixel);font-weight:700;font-size:clamp(120px,26vw,360px);line-height:.85;color:var(--cream);letter-spacing:-.02em;text-shadow:0 2px 0 rgba(0,0,0,.08),0 24px 60px rgba(60,0,10,.35);opacity:.95}
-  .l-head .name{font-family:var(--serif);font-style:italic;font-weight:400;color:#fff;font-size:clamp(20px,3vw,34px);margin-top:-.2em;letter-spacing:.01em;text-shadow:0 2px 12px rgba(60,0,10,.5)}
-  .l-photo{z-index:3;left:50%;top:50%;width:min(62vw,470px);transform:translate(-50%,-46%) translate3d(0,var(--y),0);filter:drop-shadow(0 0 1.5px rgba(8,40,104,.95)) drop-shadow(0 20px 22px rgba(0,0,0,.35)) drop-shadow(0 50px 60px rgba(60,0,10,.45));pointer-events:none}
+  /* The hero is a centred vertical stack; each layer only moves along --y so nothing overlaps at rest. */
+  .hero-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(14px,2.4vh,26px);padding:96px 20px 72px;text-align:center}
+  .hero-inner .layer{position:relative;transform:translate3d(0,var(--y),0)}
+  .l-photo{z-index:3;width:min(56vw,34vh,320px);filter:drop-shadow(0 0 1.5px rgba(8,40,104,.95)) drop-shadow(0 16px 18px rgba(0,0,0,.35)) drop-shadow(0 40px 50px rgba(60,0,10,.45));pointer-events:none}
   .l-photo img{width:100%;height:auto}
-  .l-sub{z-index:4;left:50%;top:50%;transform:translate(-50%,-50%) translate3d(0,var(--y),0);width:min(90vw,640px);text-align:center;margin-top:min(30vh,270px)}
+  .l-head{z-index:2;width:100%;pointer-events:none}
+  .l-head .big{font-family:var(--pixel);font-weight:700;font-size:clamp(46px,10.5vw,148px);line-height:.9;color:var(--cream);text-transform:lowercase;letter-spacing:-.01em;text-shadow:0 2px 0 rgba(0,0,0,.08),0 24px 60px rgba(60,0,10,.35);overflow-wrap:anywhere}
+  .l-head .name{font-family:var(--serif);font-style:italic;font-weight:400;color:#fff;font-size:clamp(18px,2.4vw,28px);margin-top:.35em;letter-spacing:.01em;text-shadow:0 2px 12px rgba(60,0,10,.5)}
+  .l-sub{z-index:4;width:min(90vw,640px)}
   .l-sub p{margin:0;font-family:var(--sans);font-weight:500;color:#fff;font-size:clamp(16px,1.9vw,21px);background:var(--navy);display:inline-block;padding:10px 16px;border-radius:10px;box-shadow:0 18px 40px -16px rgba(0,0,0,.6);text-wrap:balance}
-  .l-cta{z-index:5;left:50%;top:50%;transform:translate(-50%,-50%) translate3d(0,var(--y),0);margin-top:min(40vh,360px);display:flex;gap:10px;flex-wrap:nowrap;justify-content:center;white-space:nowrap}
+  .l-cta{z-index:5;display:flex;gap:10px;flex-wrap:nowrap;justify-content:center;white-space:nowrap}
   .btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:15px;padding:14px 22px;border-radius:12px;border:2px solid transparent;transition:transform .15s ease, box-shadow .15s ease}
   .btn:hover{transform:translateY(-2px)}
   .btn-primary{background:var(--cream);color:var(--navy);box-shadow:0 14px 30px -14px rgba(0,0,0,.7)}
@@ -67,8 +69,9 @@
   .scroll-hint::after{content:"";display:block;width:1px;height:28px;background:#fff;margin:8px 0 0 2px;animation:drip 1.6s ease-in-out infinite}
   @media (max-width:640px){
     .eyebrow{font-size:9px;letter-spacing:.14em;top:60px}
-    .l-sub{margin-top:min(26vh,220px)} .l-sub p{font-size:15px;padding:9px 12px}
-    .l-cta{margin-top:min(38vh,320px);gap:8px} .l-cta .btn{padding:12px 16px;font-size:14px}
+    .hero-inner{padding:88px 16px 56px;gap:14px}
+    .l-sub p{font-size:15px;padding:9px 12px}
+    .l-cta{gap:8px} .l-cta .btn{padding:12px 16px;font-size:14px}
     .scroll-hint{display:none}
   }
   @keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
@@ -84,12 +87,10 @@
   @media (prefers-reduced-motion: reduce){
     .rise{animation:none}
     .hero{height:auto;min-height:0;max-height:none;padding:120px 20px 80px}
-    .layer{position:static;transform:none!important;will-change:auto}
+    .layer{transform:none!important;will-change:auto}
     .l-bg{position:absolute;inset:0}
-    .hero-inner{position:relative;inset:auto;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
-    .l-head .big{font-size:clamp(90px,20vw,240px)}
-    .l-photo{width:min(70vw,360px)}
-    .l-sub,.l-cta{margin-top:0}
+    .hero-inner{position:relative;inset:auto;padding:0}
+    .l-photo{width:min(70vw,320px)}
     .eyebrow,.scroll-hint{display:none}
   }
 
@@ -175,7 +176,7 @@
 <body>
 
 <nav class="nav" aria-label="Main">
-  <a class="brand" href="#top">MOI</a>
+  <a class="brand" href="#top">moixhka</a>
   <ul>
     <li><a href="#work">Work</a></li>
     <li><a href="#listen">Listen</a></li>
@@ -189,17 +190,17 @@
   <div class="layer l-bg" data-speed="0.10" aria-hidden="true"></div>
   <div class="eyebrow rise rise-1">Composer · Violinist · Sound designer — Mexico</div>
   <div class="hero-inner">
-    <div class="layer l-head rise rise-2" data-speed="0.24">
-      <h1 class="big">MOI</h1>
-      <div class="name">Moisés Camargo Cano</div>
-    </div>
-    <div class="layer l-photo rise rise-3" data-speed="0.40">
+    <div class="layer l-photo rise rise-2" data-speed="0.46">
       <img src="moi.png" alt="Line-art portrait of Moi" width="921" height="954" fetchpriority="high">
     </div>
-    <div class="layer l-sub rise rise-4" data-speed="0.58">
+    <div class="layer l-head rise rise-3" data-speed="0.28">
+      <h1 class="big">moixhka</h1>
+      <div class="name">Moisés Camargo Cano</div>
+    </div>
+    <div class="layer l-sub rise rise-4" data-speed="0.34">
       <p>Original scores for video games, film &amp; animation — composer of <em>Bō: Path of the Teal Lotus</em></p>
     </div>
-    <div class="layer l-cta rise rise-5" data-speed="0.68">
+    <div class="layer l-cta rise rise-5" data-speed="0.40">
       <a class="btn btn-primary" href="#listen">▶ &nbsp;Listen</a>
       <a class="btn btn-ghost" href="#contact">Work with me</a>
     </div>
