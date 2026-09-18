@@ -206,6 +206,8 @@
   .ear-result b{display:block;font-family:var(--pixel);font-size:clamp(20px,4vw,32px);color:var(--red);margin:10px 0 6px}
   /* pong */
   .pong{display:block;width:100%;aspect-ratio:8/5;border-radius:12px;background:var(--navy);touch-action:none}
+  .g-stat.ok{color:#1f8a80} .g-stat.bad{color:var(--red)}
+  .pg-code{font:700 13px var(--pixel);letter-spacing:.14em;text-transform:uppercase;width:112px;padding:9px 10px;border:2px solid var(--navy);border-radius:10px;background:#fff;color:var(--navy);outline-color:var(--red)}
 
   /* Contact */
   .contact{background:var(--navy);color:#fff}
@@ -416,7 +418,7 @@
       <article class="toy">
         <svg viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#082868"/><g fill="#f6efe3"><rect x="0" y="2" width="1" height="3"/><rect x="7" y="3" width="1" height="3"/><rect x="3" y="0" width="1" height="1" opacity=".4"/><rect x="3" y="2" width="1" height="1" opacity=".4"/><rect x="3" y="4" width="1" height="1" opacity=".4"/><rect x="3" y="6" width="1" height="1" opacity=".4"/></g><rect x="4" y="3" width="1" height="1" fill="#c81828"/></svg>
         <h3>pentatonic pong</h3>
-        <p>Pong, except every paddle hit plays the next note of a melody. Keep the rally alive to hear the whole phrase. First to seven.</p>
+        <p>Pong, except every paddle hit plays the next note of a melody. Play the CPU, or send a friend a link and play online. First to seven.</p>
         <span class="best" data-best="pong"></span>
         <button class="btn" data-game="pong">▶ &nbsp;Play</button>
       </article>
@@ -635,27 +637,155 @@
   }
   function earUnmount(){ ear.el = null; }
 
-  /* ============ 3. pentatonic pong ============ */
+  /* ============ 3. pentatonic pong — solo vs CPU, or online vs a friend (WebRTC via PeerJS) ============ */
   var MELODY = [69, 72, 74, 76, 79, 81, 79, 76, 74, 72, 69, 67, 64, 67, 69, 72];   // A minor pentatonic phrase
-  var pong = { cv: null, cx: null, raf: 0, run: false, W: 800, H: 500, PH: 96, PW: 14, R: 9, ball: {x:0,y:0,vx:0,vy:0}, p: {y:250,target:null}, c: {y:250}, ps: 0, cs: 0, rally: 0, best: +(store('moixhka.pong.best') || 0), note: 0, speed: 6, keys: {}, started: false, winner: null, onKey: null, onKeyUp: null };
+  var pong = { cv: null, cx: null, raf: 0, run: false, W: 800, H: 500, PH: 96, PW: 14, R: 9,
+    ball: {x:0,y:0,vx:0,vy:0}, p: {y:250,target:null}, c: {y:250}, ps: 0, cs: 0, rally: 0,
+    best: +(store('moixhka.pong.best') || 0), note: 0, speed: 6, keys: {}, started: false, winner: null,
+    onKey: null, onKeyUp: null, pendingJoin: null,
+    net: { mode: 'solo', peer: null, conn: null, code: '', status: '', sendTimer: null, lastRx: 0, remote: null } };
+
+  /* --- networking: the host runs the physics; the guest sends its paddle and renders the host's state --- */
+  var NET_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', PEER_CDN = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+  function netCode(){ var s = ''; for (var i = 0; i < 5; i++) s += NET_ALPHABET[Math.floor(Math.random() * NET_ALPHABET.length)]; return s; }
+  function netOnline(){ return pong.net.mode !== 'solo' && !!pong.net.conn && pong.net.conn.open; }
+  function netSend(m){ var c = pong.net.conn; if (c && c.open){ try { c.send(m); } catch(e){} } }
+  function netErrMsg(e){
+    var t = e && e.type || '';
+    if (/network|socket|server/.test(t)) return 'Couldn’t reach the matchmaking server. Try again in a moment, or from another network.';
+    if (t === 'browser-incompatible') return 'This browser can’t do peer-to-peer connections (WebRTC).';
+    return 'Multiplayer error' + (t ? ' (' + t + ')' : '') + '. Try again.';
+  }
+  function netLink(code){ return location.origin + location.pathname + '#pong=' + code; }
+  function $pg(sel){ return pong.cv && pong.cv.parentNode ? pong.cv.parentNode.querySelector(sel) : null; }
+  function netStatus(msg, cls){ pong.net.status = msg; var el = $pg('#pg-net'); if (el){ el.textContent = msg; el.className = 'g-stat' + (cls ? ' ' + cls : ''); } pongStats(); }
+  function loadPeer(cb){
+    if (window.Peer) return cb();
+    var s = document.createElement('script'); s.src = PEER_CDN; s.onload = cb;
+    s.onerror = function(){ netStatus('Could not load the multiplayer library.', 'bad'); };
+    document.head.appendChild(s);
+  }
+  function netHost(){
+    if (pong.net.mode !== 'solo') return;
+    netStatus('Opening a room…');
+    loadPeer(function(){
+      var code = netCode(), peer = new Peer('moixhka-pong-' + code, { debug: 0 });
+      pong.net.mode = 'host'; pong.net.peer = peer; pong.net.code = code;
+      peer.on('open', function(){ netStatus('Room ' + code + ' — waiting for a friend…'); netRenderInvite(); });
+      peer.on('connection', function(conn){
+        if (pong.net.conn && pong.net.conn.open){                                    // one guest per room
+          var bye = function(){ try { conn.send({ t: 'full' }); } catch(e){} setTimeout(function(){ try { conn.close(); } catch(e){} }, 150); };
+          if (conn.open) bye(); else conn.on('open', bye);
+          try { if (!conn.open) conn.close(); } catch(e){}
+          return;
+        }
+        pong.net.conn = conn;
+        conn.on('open', function(){ netStatus('Connected — playing vs your friend', 'ok'); pongReset(); pong.net.lastRx = Date.now(); pong.net.sendTimer = setInterval(netHostTick, 33); netRenderInvite(); });
+        conn.on('data', function(m){ if (!m) return; if (m.t === 'p'){ pong.c.y = Math.max(pong.PH / 2, Math.min(pong.H - pong.PH / 2, +m.y || 0)); pong.net.lastRx = Date.now(); } else if (m.t === 'go'){ pongGo(); } });
+        conn.on('close', netDrop); conn.on('error', netDrop);
+      });
+      peer.on('error', function(e){
+        if (e.type === 'unavailable-id'){ try { peer.destroy(); } catch(x){} pong.net.mode = 'solo'; pong.net.peer = null; netHost(); return; }
+        netFail(netErrMsg(e));
+      });
+    });
+  }
+  function netHostTick(){
+    if (!netOnline()) return;
+    var b = pong.ball;
+    netSend({ t: 's', b: [Math.round(b.x), Math.round(b.y), +b.vx.toFixed(2), +b.vy.toFixed(2)], p: Math.round(pong.p.y), ps: pong.ps, cs: pong.cs, r: pong.rally, n: pong.note, st: pong.started ? 1 : 0, w: pong.winner || '' });
+    if (Date.now() - pong.net.lastRx > 5000) netDrop();
+  }
+  function netJoin(code){
+    code = (code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
+    if (code.length < 5){ netStatus('Enter the 5-character room code.', 'bad'); return; }
+    if (pong.net.mode !== 'solo') netTeardown();
+    netStatus('Connecting to ' + code + '…');
+    loadPeer(function(){
+      var peer = new Peer({ debug: 0 });
+      pong.net.mode = 'guest'; pong.net.peer = peer; pong.net.code = code; pong.net.remote = null;
+      peer.on('open', function(){
+        var conn = peer.connect('moixhka-pong-' + code, { reliable: false, serialization: 'json' });
+        pong.net.conn = conn;
+        var t = setTimeout(function(){ if (!conn.open) netFail('Couldn’t reach room ' + code + '. Check the code — or one of your networks may block direct connections.'); }, 12000);
+        conn.on('open', function(){ clearTimeout(t); netStatus('Connected — you’re on the left', 'ok'); pong.ps = 0; pong.cs = 0; pong.rally = 0; pong.winner = null; pong.started = false; pong.net.sendTimer = setInterval(function(){ netSend({ t: 'p', y: Math.round(pong.p.y) }); }, 33); netRenderInvite(); });
+        conn.on('data', function(m){ if (!m) return; if (m.t === 's') netApply(m); else if (m.t === 'full'){ clearTimeout(t); netFail('Room ' + code + ' already has two players.'); } });
+        conn.on('close', function(){ netFail('Your friend left. Back to solo.'); });
+        conn.on('error', function(){ netFail('Connection lost. Back to solo.'); });
+      });
+      peer.on('error', function(e){ netFail(e.type === 'peer-unavailable' ? 'Room ' + code + ' isn’t open. Ask your friend for a fresh link.' : netErrMsg(e)); });
+    });
+  }
+  function netApply(m){
+    var r = pong.net.remote || (pong.net.remote = { r: 0, ps: 0, cs: 0 });
+    var prevR = r.r, prevPs = r.ps, prevCs = r.cs;
+    r.bx = m.b[0]; r.by = m.b[1]; r.vx = m.b[2]; r.vy = m.b[3]; r.p = m.p; r.ps = m.ps; r.cs = m.cs; r.r = m.r; r.n = m.n; r.st = m.st; r.w = m.w; r.at = performance.now();
+    // sounds come from state deltas: the channel is unreliable, but the state is the truth
+    if (m.r > prevR) tone({ type: 'square', freq: mtof(MELODY[(m.n - 1 + MELODY.length) % MELODY.length]), dur: .16, vol: .18, lp: 6000 });
+    if (m.ps > prevPs || m.cs > prevCs){ var mine = m.cs > prevCs, c = audio(), t = c.currentTime; tone({ t: t, type: 'triangle', freq: mtof(mine ? 64 : 60), dur: .12, vol: .18 }); tone({ t: t + .12, type: 'triangle', freq: mtof(mine ? 71 : 55), dur: .2, vol: .18 }); }
+    pong.ps = m.ps; pong.cs = m.cs; pong.rally = m.r; pong.winner = m.w || null; pong.started = !!m.st;
+    if (m.r > pong.best){ pong.best = m.r; store('moixhka.pong.best', pong.best); }
+    pongStats();
+  }
+  function netFail(msg){ netTeardown(); netStatus(msg, 'bad'); netRenderInvite(); }
+  function netDrop(){
+    if (pong.net.mode !== 'host') return netFail('Connection lost. Back to solo.');
+    if (pong.net.conn){ try { pong.net.conn.close(); } catch(e){} }
+    pong.net.conn = null; clearInterval(pong.net.sendTimer); pong.net.sendTimer = null; pong.net.lastRx = 0;
+    pongReset(); netStatus('Friend disconnected — room ' + pong.net.code + ' is still open', 'bad'); netRenderInvite();
+  }
+  function netTeardown(){
+    clearInterval(pong.net.sendTimer); pong.net.sendTimer = null;
+    if (pong.net.conn){ try { pong.net.conn.close(); } catch(e){} }
+    if (pong.net.peer){ try { pong.net.peer.destroy(); } catch(e){} }
+    pong.net.mode = 'solo'; pong.net.peer = null; pong.net.conn = null; pong.net.code = ''; pong.net.remote = null; pong.net.lastRx = 0;
+    pongReset();
+  }
+  function netRenderInvite(){
+    var box = $pg('#pg-invite'); if (!box) return;
+    var n = pong.net, html;
+    if (n.mode === 'solo') html = '<button class="g-btn red" id="pg-host">Invite a friend</button><span class="g-stat">or</span><input class="pg-code" id="pg-code" maxlength="5" placeholder="CODE" aria-label="Room code" autocomplete="off" spellcheck="false"><button class="g-btn" id="pg-join">Join</button>';
+    else if (n.mode === 'host') html = '<span class="g-stat">Room <b>' + n.code + '</b></span>' + (netOnline() ? '' : '<button class="g-btn primary" id="pg-copy">Copy invite link</button>') + '<button class="g-btn" id="pg-leave">' + (netOnline() ? 'Leave' : 'Close room') + '</button>';
+    else html = '<span class="g-stat">Room <b>' + n.code + '</b></span><button class="g-btn" id="pg-leave">Leave</button>';
+    box.innerHTML = html;
+    var b;
+    if ((b = box.querySelector('#pg-host'))) b.onclick = function(){ audio(); netHost(); };
+    if ((b = box.querySelector('#pg-join'))) b.onclick = function(){ audio(); netJoin(box.querySelector('#pg-code').value); };
+    if ((b = box.querySelector('#pg-code'))) b.onkeydown = function(e){ if (e.key === 'Enter'){ audio(); netJoin(b.value); } e.stopPropagation(); };
+    if ((b = box.querySelector('#pg-copy'))) b.onclick = function(){ var url = netLink(n.code), me = this; function done(){ me.textContent = 'Copied!'; setTimeout(function(){ me.textContent = 'Copy invite link'; }, 1600); } if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, function(){ prompt('Send this link to a friend', url); }); else prompt('Send this link to a friend', url); };
+    if ((b = box.querySelector('#pg-leave'))) b.onclick = function(){ netTeardown(); netStatus('Solo vs the CPU'); netRenderInvite(); };
+    var opp = $pg('#pg-opp'); if (opp) opp.textContent = netOnline() ? 'Friend' : 'CPU';
+  }
+
+  /* --- game --- */
   function pongServe(dir){ pong.ball.x = pong.W / 2; pong.ball.y = pong.H / 2; pong.speed = 6; var a = (Math.random() * .8 - .4); pong.ball.vx = Math.cos(a) * pong.speed * dir; pong.ball.vy = Math.sin(a) * pong.speed; pong.rally = 0; pong.note = 0; }
   function pongReset(){ pong.ps = 0; pong.cs = 0; pong.winner = null; pong.started = false; pongServe(Math.random() < .5 ? -1 : 1); pongStats(); }
-  function pongStats(){ var el = pong.cv && pong.cv.parentNode; if (!el) return; el.querySelector('#pg-ps').textContent = pong.ps; el.querySelector('#pg-cs').textContent = pong.cs; el.querySelector('#pg-r').textContent = pong.rally; el.querySelector('#pg-b').textContent = pong.best; }
+  function pongStats(){
+    var el = pong.cv && pong.cv.parentNode; if (!el) return;
+    var guest = pong.net.mode === 'guest' && netOnline();
+    el.querySelector('#pg-ps').textContent = guest ? pong.cs : pong.ps; el.querySelector('#pg-cs').textContent = guest ? pong.ps : pong.cs;
+    el.querySelector('#pg-r').textContent = pong.rally; el.querySelector('#pg-b').textContent = pong.best;
+  }
+  function pongGo(){ audio(); if (pong.net.mode === 'guest'){ netSend({ t: 'go' }); return; } if (pong.winner) pongReset(); if (!pong.started) pong.started = true; }
   function pongHit(){ tone({ type: 'square', freq: mtof(MELODY[pong.note % MELODY.length]), dur: .16, vol: .18, lp: 6000 }); pong.note++; pong.rally++; if (pong.rally > pong.best){ pong.best = pong.rally; store('moixhka.pong.best', pong.best); } pongStats(); }
   function pongScore(who){
     if (who === 'p') pong.ps++; else pong.cs++;
     var c = audio(), t = c.currentTime, up = who === 'p';
     tone({ t: t, type: 'triangle', freq: mtof(up ? 64 : 60), dur: .12, vol: .18 }); tone({ t: t + .12, type: 'triangle', freq: mtof(up ? 71 : 55), dur: .2, vol: .18 });
-    if (pong.ps >= 7 || pong.cs >= 7){ pong.winner = pong.ps >= 7 ? 'you' : 'cpu'; pong.started = false; }
+    if (pong.ps >= 7 || pong.cs >= 7){ pong.winner = pong.ps >= 7 ? 'L' : 'R'; pong.started = false; }
     pongServe(who === 'p' ? 1 : -1); pongStats(); refreshBests();
   }
   function pongUpdate(){
     var b = pong.ball, P = pong.p, C = pong.c, hh = pong.PH / 2;
+    // my paddle is always simulated locally so it never lags
     if (pong.keys.up) P.y -= 8; if (pong.keys.down) P.y += 8;
     if (P.target != null) P.y += (P.target - P.y) * .35;
     P.y = Math.max(hh, Math.min(pong.H - hh, P.y));
-    var aim = b.vx > 0 ? b.y + b.vy * 4 : pong.H / 2, dc = aim - C.y, mx = 5.4 + Math.min(3, pong.speed * .18);
-    C.y += Math.max(-mx, Math.min(mx, dc * .18)); C.y = Math.max(hh, Math.min(pong.H - hh, C.y));
+    if (pong.net.mode === 'guest') return;                       // the host owns the ball
+    if (!(pong.net.mode === 'host' && netOnline())){             // no friend connected: CPU drives the right paddle
+      var aim = b.vx > 0 ? b.y + b.vy * 4 : pong.H / 2, dc = aim - C.y, mx = 5.4 + Math.min(3, pong.speed * .18);
+      C.y += Math.max(-mx, Math.min(mx, dc * .18)); C.y = Math.max(hh, Math.min(pong.H - hh, C.y));
+    }
     if (!pong.started) return;
     b.x += b.vx; b.y += b.vy;
     if (b.y - pong.R < 0){ b.y = pong.R; b.vy = -b.vy; noise({ dur: .03, vol: .08, hp: 3000 }); }
@@ -670,35 +800,45 @@
     if (b.x < -pong.R * 2) pongScore('c'); else if (b.x > pong.W + pong.R * 2) pongScore('p');
   }
   function pongDraw(){
-    var x = pong.cx, W = pong.W, H = pong.H;
+    var x = pong.cx, W = pong.W, H = pong.H, guest = pong.net.mode === 'guest' && netOnline(), online = guest || (pong.net.mode === 'host' && netOnline()), r = pong.net.remote;
+    var leftY = pong.p.y, rightY = pong.c.y, bx = pong.ball.x, by = pong.ball.y, sL = pong.ps, sR = pong.cs;
+    if (guest){                                                  // mirror the host's world so I'm on the left
+      rightY = r ? r.p : H / 2; sL = pong.cs; sR = pong.ps;
+      if (r && pong.started){ var f = Math.min(6, (performance.now() - r.at) / 16.667); bx = W - (r.bx + r.vx * f); by = r.by + r.vy * f; }
+      else { bx = W / 2; by = H / 2; }
+    }
     x.fillStyle = '#082868'; x.fillRect(0, 0, W, H);
     x.fillStyle = 'rgba(246,239,227,.35)'; for (var y = 10; y < H; y += 26) x.fillRect(W / 2 - 4, y, 8, 8);
-    x.fillStyle = 'rgba(246,239,227,.18)'; x.font = '64px Silkscreen, monospace'; x.textAlign = 'center'; x.fillText(pong.ps, W / 2 - 90, 84); x.fillText(pong.cs, W / 2 + 90, 84);
+    x.fillStyle = 'rgba(246,239,227,.18)'; x.font = '64px Silkscreen, monospace'; x.textAlign = 'center'; x.fillText(sL, W / 2 - 90, 84); x.fillText(sR, W / 2 + 90, 84);
     x.fillStyle = '#f6efe3';
-    x.fillRect(30, pong.p.y - pong.PH / 2, pong.PW, pong.PH); x.fillRect(W - 30 - pong.PW, pong.c.y - pong.PH / 2, pong.PW, pong.PH);
-    x.shadowColor = 'rgba(200,24,40,.9)'; x.shadowBlur = 18; x.fillStyle = '#c81828'; x.beginPath(); x.arc(pong.ball.x, pong.ball.y, pong.R, 0, Math.PI * 2); x.fill(); x.shadowBlur = 0;
+    x.fillRect(30, leftY - pong.PH / 2, pong.PW, pong.PH); x.fillRect(W - 30 - pong.PW, rightY - pong.PH / 2, pong.PW, pong.PH);
+    x.shadowColor = 'rgba(200,24,40,.9)'; x.shadowBlur = 18; x.fillStyle = '#c81828'; x.beginPath(); x.arc(bx, by, pong.R, 0, Math.PI * 2); x.fill(); x.shadowBlur = 0;
     if (!pong.started){
       x.fillStyle = '#f6efe3'; x.font = '15px Silkscreen, monospace';
-      var msg = pong.winner ? (pong.winner === 'you' ? 'YOU WIN — TAP TO PLAY AGAIN' : 'CPU WINS — TAP TO PLAY AGAIN') : 'TAP / CLICK / SPACE TO SERVE';
+      var msg;
+      if (pong.winner){ var mine = guest ? pong.winner === 'R' : pong.winner === 'L'; msg = (mine ? 'YOU WIN' : (online ? 'FRIEND WINS' : 'CPU WINS')) + ' — TAP TO PLAY AGAIN'; }
+      else if (pong.net.mode === 'host' && !netOnline() && pong.net.code) msg = 'WAITING FOR A FRIEND — OR TAP TO PLAY THE CPU';
+      else msg = 'TAP / CLICK / SPACE TO SERVE';
       x.fillText(msg, W / 2, H / 2 + 60);
     }
   }
   function pongFrame(){ if (!pong.run) return; pongUpdate(); pongDraw(); pong.raf = requestAnimationFrame(pongFrame); }
   function pongMount(el){
-    el.innerHTML = '<div class="g-row"><span class="g-stat">You <b id="pg-ps">0</b> · CPU <b id="pg-cs">0</b></span><span class="g-stat" style="margin-left:auto">Rally <b id="pg-r">0</b> · Longest phrase <b id="pg-b">0</b></span></div><canvas class="pong" id="pg-cv" width="800" height="500" aria-label="Pentatonic pong"></canvas><p class="g-note">Move with the mouse, a finger, or ↑ ↓ / W S. Every paddle hit plays the next note of a pentatonic phrase — keep the rally alive to hear the whole melody. First to seven.</p>';
+    el.innerHTML = '<div class="g-row"><span class="g-stat">You <b id="pg-ps">0</b> · <span id="pg-opp">CPU</span> <b id="pg-cs">0</b></span><span class="g-stat" style="margin-left:auto">Rally <b id="pg-r">0</b> · Longest phrase <b id="pg-b">0</b></span></div><canvas class="pong" id="pg-cv" width="800" height="500" aria-label="Pentatonic pong"></canvas><div class="g-row" style="margin-top:14px" id="pg-invite"></div><div class="g-stat" id="pg-net">Solo vs the CPU</div><p class="g-note">Move with the mouse, a finger, or ↑ ↓ / W S. Every paddle hit plays the next note of a pentatonic phrase — keep the rally alive to hear the whole melody. First to seven. <b>Invite a friend</b> for a two-player match over the internet: the link is all they need.</p>';
     var cv = el.querySelector('#pg-cv'); pong.cv = cv; pong.cx = cv.getContext('2d'); pong.p.target = null; pongReset(); pong.run = true;
     function toY(clientY){ var r = cv.getBoundingClientRect(); return (clientY - r.top) * (pong.H / r.height); }
-    function go(){ audio(); if (pong.winner) pongReset(); if (!pong.started) pong.started = true; }
     cv.addEventListener('mousemove', function(e){ pong.p.target = toY(e.clientY); });
     cv.addEventListener('touchmove', function(e){ e.preventDefault(); pong.p.target = toY(e.touches[0].clientY); }, { passive: false });
-    cv.addEventListener('touchstart', function(e){ pong.p.target = toY(e.touches[0].clientY); go(); }, { passive: true });
-    cv.addEventListener('click', go);
-    pong.onKey = function(e){ if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W'){ pong.keys.up = true; pong.p.target = null; e.preventDefault(); } if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S'){ pong.keys.down = true; pong.p.target = null; e.preventDefault(); } if (e.key === ' '){ go(); e.preventDefault(); } };
+    cv.addEventListener('touchstart', function(e){ pong.p.target = toY(e.touches[0].clientY); pongGo(); }, { passive: true });
+    cv.addEventListener('click', pongGo);
+    pong.onKey = function(e){ if (e.target && e.target.tagName === 'INPUT') return; if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W'){ pong.keys.up = true; pong.p.target = null; e.preventDefault(); } if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S'){ pong.keys.down = true; pong.p.target = null; e.preventDefault(); } if (e.key === ' '){ pongGo(); e.preventDefault(); } };
     pong.onKeyUp = function(e){ if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') pong.keys.up = false; if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') pong.keys.down = false; };
     window.addEventListener('keydown', pong.onKey); window.addEventListener('keyup', pong.onKeyUp);
+    netRenderInvite();
+    if (pong.pendingJoin){ var code = pong.pendingJoin; pong.pendingJoin = null; netJoin(code); }
     pong.raf = requestAnimationFrame(pongFrame);
   }
-  function pongUnmount(){ pong.run = false; cancelAnimationFrame(pong.raf); window.removeEventListener('keydown', pong.onKey); window.removeEventListener('keyup', pong.onKeyUp); pong.keys = {}; pong.cv = null; }
+  function pongUnmount(){ pong.run = false; cancelAnimationFrame(pong.raf); window.removeEventListener('keydown', pong.onKey); window.removeEventListener('keyup', pong.onKeyUp); pong.keys = {}; netTeardown(); pong.cv = null; }
 
   /* ============ window plumbing ============ */
   var GAMES = {
@@ -730,7 +870,9 @@
   gm.addEventListener('click', function(e){ if (e.target === gm) closeGame(); });
   window.addEventListener('keydown', function(e){ if (e.key === 'Escape' && current) closeGame(); });
   refreshBests();
-  if (/#seq=[0-9a-f]{32}/i.test(location.hash)){ document.getElementById('bored').scrollIntoView(); openGame('seq'); }
+  var pj = location.hash.match(/#pong=([A-Za-z0-9]{5})/);
+  if (pj){ pong.pendingJoin = pj[1].toUpperCase(); document.getElementById('bored').scrollIntoView(); openGame('pong'); }
+  else if (/#seq=[0-9a-f]{32}/i.test(location.hash)){ document.getElementById('bored').scrollIntoView(); openGame('seq'); }
 })();
 </script>
 </body>
