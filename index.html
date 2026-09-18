@@ -156,6 +156,57 @@
   .about li b{display:block;color:var(--navy);font-weight:700}
   @media (max-width:820px){.about .wrap{grid-template-columns:1fr}.about ul{grid-template-columns:1fr}}
 
+  /* Bored? */
+  .bored{background:var(--paper)}
+  .toys{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+  .toy{background:var(--navy);color:#fff;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-paper);position:relative;overflow:hidden}
+  .toy::before{content:"";position:absolute;right:-40px;bottom:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(200,24,40,.5),transparent 70%);pointer-events:none}
+  .toy svg{width:56px;height:56px;shape-rendering:crispEdges}
+  .toy h3{font-family:var(--pixel);font-size:15px;color:var(--cream);letter-spacing:.02em;text-transform:lowercase}
+  .toy p{margin:0;color:rgba(255,255,255,.82);font-size:15px;flex:1}
+  .toy .best{font-family:var(--pixel);font-size:10px;letter-spacing:.12em;color:#ffb3bb;text-transform:uppercase;min-height:1em}
+  .toy .btn{align-self:flex-start;background:var(--red);color:#fff;position:relative}
+  @media (max-width:820px){.toys{grid-template-columns:1fr}}
+
+  /* Game window */
+  .gm{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(6,28,74,.88);backdrop-filter:blur(8px)}
+  .gm[hidden]{display:none!important}
+  .gm-box{background:var(--cream);color:var(--ink);border-radius:18px;width:min(920px,100%);max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
+  .gm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid rgba(8,40,104,.12);position:sticky;top:0;background:var(--cream);z-index:2}
+  .gm-head h3{font-family:var(--pixel);font-size:13px;color:var(--navy);text-transform:lowercase;letter-spacing:.04em}
+  .gm-close{border:0;background:var(--navy);color:#fff;width:36px;height:36px;border-radius:10px;font-size:20px;line-height:1;cursor:pointer;flex:none}
+  .gm-body{padding:18px}
+  .g-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+  .g-btn{font:600 14px var(--sans);padding:10px 14px;border-radius:10px;border:2px solid var(--navy);background:transparent;color:var(--navy);cursor:pointer;transition:transform .1s}
+  .g-btn:active{transform:scale(.97)}
+  .g-btn.primary{background:var(--navy);color:#fff}
+  .g-btn.red{background:var(--red);border-color:var(--red);color:#fff}
+  .g-btn:disabled{opacity:.45;cursor:default}
+  .g-stat{font-family:var(--pixel);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy)}
+  .g-stat b{color:var(--red)}
+  .g-note{font-size:14px;color:var(--muted);margin:12px 0 0}
+  input[type=range]{accent-color:var(--red);width:120px}
+  /* sequencer */
+  .seq-wrap{overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+  .seq{display:grid;grid-template-columns:30px repeat(16,minmax(22px,1fr));gap:4px;min-width:540px}
+  .seq .lbl{font-family:var(--pixel);font-size:9px;color:var(--muted);display:flex;align-items:center}
+  .seq .lbl.drum{color:var(--navy)}
+  .cell{aspect-ratio:1;border:0;border-radius:5px;background:rgba(8,40,104,.10);cursor:pointer;padding:0;transition:background .08s}
+  .cell.q{background:rgba(8,40,104,.19)}
+  .cell.on{background:var(--red)}
+  .cell.drum.on{background:var(--navy)}
+  .cell.ph{box-shadow:inset 0 0 0 2px var(--navy)}
+  .cell.on.ph{filter:brightness(1.3)}
+  /* ear training */
+  .ear-answers{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:14px 0}
+  .ear-answers .g-btn.ok{background:#1f8a80;border-color:#1f8a80;color:#fff}
+  .ear-answers .g-btn.bad{background:var(--red);border-color:var(--red);color:#fff}
+  .ear-feedback{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--navy);min-height:1.4em}
+  .ear-result{text-align:center;padding:20px 0}
+  .ear-result b{display:block;font-family:var(--pixel);font-size:clamp(20px,4vw,32px);color:var(--red);margin:10px 0 6px}
+  /* pong */
+  .pong{display:block;width:100%;aspect-ratio:8/5;border-radius:12px;background:var(--navy);touch-action:none}
+
   /* Contact */
   .contact{background:var(--navy);color:#fff}
   .contact h2{color:#fff}
@@ -181,6 +232,7 @@
     <li><a href="#work">Work</a></li>
     <li><a href="#listen">Listen</a></li>
     <li><a href="#about">About</a></li>
+    <li><a href="#bored">Bored?</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
 </nav>
@@ -337,6 +389,41 @@
   </div>
 </section>
 
+<!-- ================= BORED? ================= -->
+<section id="bored" class="bored">
+  <div class="wrap">
+    <p class="kicker">Bored?</p>
+    <h2>Three tiny toys, one synth.</h2>
+    <p class="lead">No samples, no downloads — everything you hear is made by your browser's own oscillators, tuned to the pentatonic scales Moi writes with. Headphones on.</p>
+
+    <div class="toys">
+      <article class="toy">
+        <svg viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#082868"/><g fill="#f6efe3" opacity=".35"><rect x="0" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="6" y="0" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="7" y="2" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="7" y="6" width="1" height="1"/></g><g fill="#c81828"><rect x="1" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/></g></svg>
+        <h3>paper beats</h3>
+        <p>A 16-step chiptune sequencer: five pentatonic rows on top, hats, snare and kick below. Tap squares, press play, and share your loop with a link.</p>
+        <span class="best" data-best="seq"></span>
+        <button class="btn" data-game="seq">▶ &nbsp;Open</button>
+      </article>
+
+      <article class="toy">
+        <svg viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#082868"/><g fill="#f6efe3"><rect x="0" y="4" width="1" height="2"/><rect x="1" y="2" width="1" height="5"/><rect x="2" y="3" width="1" height="3"/><rect x="3" y="0" width="1" height="8"/><rect x="4" y="2" width="1" height="4"/><rect x="5" y="1" width="1" height="6"/><rect x="6" y="3" width="1" height="3"/><rect x="7" y="4" width="1" height="1"/></g><rect x="3" y="0" width="1" height="8" fill="#c81828"/></svg>
+        <h3>composer's ear</h3>
+        <p>Two notes, one question: what's the interval? Ten rounds, three difficulties, and a rank at the end — from <em>listener</em> to <em>OST composer</em>.</p>
+        <span class="best" data-best="ear"></span>
+        <button class="btn" data-game="ear">▶ &nbsp;Play</button>
+      </article>
+
+      <article class="toy">
+        <svg viewBox="0 0 8 8" aria-hidden="true"><rect width="8" height="8" fill="#082868"/><g fill="#f6efe3"><rect x="0" y="2" width="1" height="3"/><rect x="7" y="3" width="1" height="3"/><rect x="3" y="0" width="1" height="1" opacity=".4"/><rect x="3" y="2" width="1" height="1" opacity=".4"/><rect x="3" y="4" width="1" height="1" opacity=".4"/><rect x="3" y="6" width="1" height="1" opacity=".4"/></g><rect x="4" y="3" width="1" height="1" fill="#c81828"/></svg>
+        <h3>pentatonic pong</h3>
+        <p>Pong, except every paddle hit plays the next note of a melody. Keep the rally alive to hear the whole phrase. First to seven.</p>
+        <span class="best" data-best="pong"></span>
+        <button class="btn" data-game="pong">▶ &nbsp;Play</button>
+      </article>
+    </div>
+  </div>
+</section>
+
 <!-- ================= CONTACT ================= -->
 <section id="contact" class="contact">
   <div class="wrap">
@@ -396,6 +483,254 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+})();
+</script>
+
+<!-- ================= GAME WINDOW ================= -->
+<div class="gm" id="gm" hidden role="dialog" aria-modal="true" aria-labelledby="gm-title">
+  <div class="gm-box">
+    <div class="gm-head"><h3 id="gm-title"></h3><button class="gm-close" aria-label="Close">×</button></div>
+    <div class="gm-body" id="gm-body"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ============ tiny synth (Web Audio, no samples) ============ */
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  var ctx = null, master = null, noiseBuf = null;
+  function audio(){
+    if (!ctx){ ctx = new AC(); var comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; master = ctx.createGain(); master.gain.value = .55; master.connect(comp); comp.connect(ctx.destination); }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function mtof(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+  function tone(o){
+    var c = audio(), t = o.t != null ? o.t : c.currentTime;
+    var osc = c.createOscillator(); osc.type = o.type || 'square'; osc.frequency.value = o.freq;
+    var g = c.createGain(), v = o.vol || .25, a = o.a || .005, d = o.dur || .2, r = o.r || .06;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + a);
+    g.gain.setValueAtTime(v, t + Math.max(a, d - r)); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    var node = osc;
+    if (o.lp){ var f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.lp; f.Q.value = .7; osc.connect(f); node = f; }
+    if (o.vib){ var l = c.createOscillator(), lg = c.createGain(); l.frequency.value = 5.5; lg.gain.value = o.vib; l.connect(lg); lg.connect(osc.detune); l.start(t); l.stop(t + d + .1); }
+    node.connect(g); g.connect(master); osc.start(t); osc.stop(t + d + .05);
+  }
+  function noise(o){
+    var c = audio(), t = o.t != null ? o.t : c.currentTime;
+    if (!noiseBuf){ noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate); var dd = noiseBuf.getChannelData(0); for (var i = 0; i < dd.length; i++) dd[i] = Math.random() * 2 - 1; }
+    var s = c.createBufferSource(); s.buffer = noiseBuf;
+    var f = c.createBiquadFilter(); f.type = o.hp ? 'highpass' : 'lowpass'; f.frequency.value = o.hp || o.lp || 8000;
+    var g = c.createGain(), v = o.vol || .2, d = o.dur || .1;
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + d + .02);
+  }
+  function kick(t){ var c = audio(); t = t != null ? t : c.currentTime; var o = c.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + .14); var g = c.createGain(); g.gain.setValueAtTime(.8, t); g.gain.exponentialRampToValueAtTime(.0001, t + .28); o.connect(g); g.connect(master); o.start(t); o.stop(t + .3); }
+  function snare(t){ noise({ t: t, dur: .16, vol: .28, hp: 1400 }); tone({ t: t, type: 'triangle', freq: 190, dur: .1, vol: .22 }); }
+  function hat(t){ noise({ t: t, dur: .045, vol: .12, hp: 7500 }); }
+  function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+  function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
+
+  /* ============ 1. paper beats — 16-step chiptune sequencer ============ */
+  var SEQ_NOTES = [81, 79, 76, 74, 72];               // A5 G5 E5 D5 C5 — C major pentatonic
+  var SEQ_ROWS = [{l:'A'},{l:'G'},{l:'E'},{l:'D'},{l:'C'},{l:'HH',drum:1},{l:'SD',drum:1},{l:'BD',drum:1}];
+  var seq = { grid: new Uint8Array(128), bpm: 120, playing: false, step: 0, next: 0, timer: null, queue: [], cells: [], raf: 0 };
+  function seqHit(r, t){ if (r < 5) tone({ t: t, type: 'square', freq: mtof(SEQ_NOTES[r]), dur: .22, vol: .15, lp: 5200 }); else if (r === 5) hat(t); else if (r === 6) snare(t); else kick(t); }
+  function seqTick(){ var c = audio(); while (seq.next < c.currentTime + .12){ for (var r = 0; r < 8; r++) if (seq.grid[r * 16 + seq.step]) seqHit(r, seq.next); seq.queue.push({ s: seq.step, t: seq.next }); seq.next += 60 / seq.bpm / 4; seq.step = (seq.step + 1) % 16; } }
+  function seqDraw(){ if (!seq.playing) return; var c = audio(), cur = -1; while (seq.queue.length && seq.queue[0].t <= c.currentTime) cur = seq.queue.shift().s; if (cur >= 0) for (var i = 0; i < seq.cells.length; i++) seq.cells[i].classList.toggle('ph', (i % 16) === cur); seq.raf = requestAnimationFrame(seqDraw); }
+  function seqStart(){ var c = audio(); seq.playing = true; seq.step = 0; seq.next = c.currentTime + .06; seq.queue = []; seq.timer = setInterval(seqTick, 25); seq.raf = requestAnimationFrame(seqDraw); }
+  function seqStop(){ seq.playing = false; clearInterval(seq.timer); cancelAnimationFrame(seq.raf); seq.cells.forEach(function(el){ el.classList.remove('ph'); }); }
+  function seqRender(){ for (var i = 0; i < seq.cells.length; i++) seq.cells[i].classList.toggle('on', !!seq.grid[i]); }
+  function seqRandom(){
+    seq.grid.fill(0);
+    for (var s = 0; s < 16; s++){
+      if (Math.random() < .62) seq.grid[Math.floor(Math.random() * 5) * 16 + s] = 1;
+      if (s % 4 === 0 || Math.random() < .12) seq.grid[7 * 16 + s] = 1;
+      if (s === 4 || s === 12) seq.grid[6 * 16 + s] = 1;
+      if (s % 2 === 0 || Math.random() < .3) seq.grid[5 * 16 + s] = 1;
+    }
+    seqRender();
+  }
+  function seqEncode(){ var h = ''; for (var i = 0; i < 128; i += 4) h += ((seq.grid[i] << 3) | (seq.grid[i+1] << 2) | (seq.grid[i+2] << 1) | seq.grid[i+3]).toString(16); return h; }
+  function seqDecode(h){ if (!/^[0-9a-f]{32}$/i.test(h)) return false; for (var i = 0; i < 32; i++){ var v = parseInt(h[i], 16); seq.grid[i*4] = (v >> 3) & 1; seq.grid[i*4+1] = (v >> 2) & 1; seq.grid[i*4+2] = (v >> 1) & 1; seq.grid[i*4+3] = v & 1; } return true; }
+  function seqMount(el){
+    el.innerHTML = '<div class="g-row"><button class="g-btn red" id="sq-play">▶ Play</button><button class="g-btn" id="sq-rand">Random</button><button class="g-btn" id="sq-clear">Clear</button><button class="g-btn" id="sq-share">Share link</button><label class="g-stat" style="margin-left:auto">BPM <b id="sq-bpmv">120</b></label><input type="range" id="sq-bpm" min="70" max="180" value="120" aria-label="Tempo"></div><div class="seq-wrap"><div class="seq" id="sq-grid"></div></div><p class="g-note">Five rows of C-major pentatonic on top, hi-hat / snare / kick below. Tap squares, press play. “Share link” puts the whole loop in the URL.</p>';
+    var g = el.querySelector('#sq-grid'); seq.cells = [];
+    for (var r = 0; r < 8; r++){
+      var lb = document.createElement('div'); lb.className = 'lbl' + (SEQ_ROWS[r].drum ? ' drum' : ''); lb.textContent = SEQ_ROWS[r].l; g.appendChild(lb);
+      for (var s = 0; s < 16; s++){ var b = document.createElement('button'); b.className = 'cell' + (SEQ_ROWS[r].drum ? ' drum' : '') + (s % 4 === 0 ? ' q' : ''); b.dataset.i = r * 16 + s; b.setAttribute('aria-label', SEQ_ROWS[r].l + ' step ' + (s + 1)); g.appendChild(b); seq.cells.push(b); }
+    }
+    g.addEventListener('click', function(e){ var b = e.target.closest('.cell'); if (!b) return; var i = +b.dataset.i; seq.grid[i] ^= 1; b.classList.toggle('on', !!seq.grid[i]); if (seq.grid[i] && !seq.playing) seqHit(Math.floor(i / 16)); });
+    var play = el.querySelector('#sq-play');
+    play.onclick = function(){ if (seq.playing){ seqStop(); play.textContent = '▶ Play'; } else { seqStart(); play.textContent = '■ Stop'; } };
+    el.querySelector('#sq-rand').onclick = seqRandom;
+    el.querySelector('#sq-clear').onclick = function(){ seq.grid.fill(0); seqRender(); };
+    var bpm = el.querySelector('#sq-bpm'), bpmv = el.querySelector('#sq-bpmv');
+    bpm.oninput = function(){ seq.bpm = +bpm.value; bpmv.textContent = bpm.value; };
+    el.querySelector('#sq-share').onclick = function(){
+      var b = this, url = location.origin + location.pathname + '#seq=' + seqEncode() + '&bpm=' + seq.bpm;
+      function done(){ b.textContent = 'Copied!'; setTimeout(function(){ b.textContent = 'Share link'; }, 1600); store('moixhka.seq.shared', '1'); }
+      if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, function(){ prompt('Copy this link', url); }); else prompt('Copy this link', url);
+    };
+    var m = location.hash.match(/seq=([0-9a-f]{32})/i);
+    if (m && seqDecode(m[1])){ var bm = location.hash.match(/bpm=(\d+)/); if (bm){ seq.bpm = Math.min(180, Math.max(70, +bm[1])); bpm.value = seq.bpm; bpmv.textContent = seq.bpm; } }
+    else if (!seq.grid.some(function(v){ return v; })) seqRandom();
+    seqRender();
+  }
+  function seqUnmount(){ seqStop(); }
+
+  /* ============ 2. composer's ear — interval training ============ */
+  var IV = [{n:'Minor 2nd',s:1},{n:'Major 2nd',s:2},{n:'Minor 3rd',s:3},{n:'Major 3rd',s:4},{n:'Perfect 4th',s:5},{n:'Tritone',s:6},{n:'Perfect 5th',s:7},{n:'Minor 6th',s:8},{n:'Major 6th',s:9},{n:'Minor 7th',s:10},{n:'Major 7th',s:11},{n:'Octave',s:12}];
+  var LEVELS = { easy: [2,4,5,7,12], medium: [2,3,4,5,7,9,10,12], hard: [1,2,3,4,5,6,7,8,9,10,11,12] };
+  var ear = { level: 'easy', round: 0, score: 0, streak: 0, best: 0, cur: null, root: 60, dir: 1, busy: false, el: null };
+  function violin(m, t, dur){ tone({ t: t, type: 'sawtooth', freq: mtof(m), dur: dur, vol: .2, a: .06, r: .15, lp: 1500, vib: 7 }); }
+  function earBest(){ return +(store('moixhka.ear.' + ear.level) || 0); }
+  function earPlay(){ var c = audio(), t = c.currentTime + .05; violin(ear.root, t, .55); violin(ear.root + ear.dir * ear.cur.s, t + .62, .75); }
+  function earMount(el){
+    ear.el = el;
+    el.innerHTML = '<div class="g-row"><span class="g-stat">Level</span><button class="g-btn primary" data-lv="easy">Easy</button><button class="g-btn" data-lv="medium">Medium</button><button class="g-btn" data-lv="hard">Hard</button><span class="g-stat" style="margin-left:auto">Best <b id="er-best">' + (earBest() || '—') + '</b> / 10</span></div><div id="er-stage"></div>';
+    el.querySelectorAll('[data-lv]').forEach(function(b){ b.onclick = function(){ ear.level = b.dataset.lv; el.querySelectorAll('[data-lv]').forEach(function(x){ x.classList.toggle('primary', x === b); }); el.querySelector('#er-best').textContent = earBest() || '—'; earIntro(); }; });
+    earIntro();
+  }
+  function earIntro(){
+    var st = ear.el.querySelector('#er-stage'); ear.round = 0; ear.score = 0; ear.streak = 0; ear.best = 0; ear.busy = false;
+    st.innerHTML = '<div class="ear-result"><p class="g-note" style="margin:0 0 16px">You’ll hear two notes. Name the interval between them. Ten rounds, one answer each — replays are free.' + (ear.level === 'hard' ? ' On hard, some intervals go <em>down</em>.' : '') + '</p><button class="g-btn red" id="er-start">▶ Start</button></div>';
+    st.querySelector('#er-start').onclick = function(){ audio(); earNext(); };
+  }
+  function earNext(){
+    var pool = LEVELS[ear.level], s = pick(pool);
+    ear.cur = IV.filter(function(i){ return i.s === s; })[0];
+    ear.root = 55 + Math.floor(Math.random() * 13);
+    ear.dir = (ear.level === 'hard' && Math.random() < .4) ? -1 : 1;
+    ear.round++;
+    var st = ear.el.querySelector('#er-stage');
+    var html = '<div class="g-row"><span class="g-stat">Round <b>' + ear.round + '</b>/10</span><span class="g-stat">Score <b>' + ear.score + '</b></span><span class="g-stat">Streak <b>' + ear.streak + '</b></span><button class="g-btn" id="er-replay" style="margin-left:auto">↻ Replay</button></div><div class="ear-answers">';
+    pool.forEach(function(v){ var iv = IV.filter(function(i){ return i.s === v; })[0]; html += '<button class="g-btn" data-s="' + v + '">' + iv.n + '</button>'; });
+    html += '</div><div class="ear-feedback" id="er-fb"></div>';
+    st.innerHTML = html;
+    st.querySelector('#er-replay').onclick = earPlay;
+    st.querySelectorAll('[data-s]').forEach(function(b){ b.onclick = function(){ earAnswer(+b.dataset.s, b); }; });
+    earPlay();
+  }
+  function earAnswer(s, btn){
+    if (ear.busy) return; ear.busy = true;
+    var st = ear.el.querySelector('#er-stage'), ok = s === ear.cur.s;
+    if (ok){ ear.score++; ear.streak++; ear.best = Math.max(ear.best, ear.streak); btn.classList.add('ok'); }
+    else { ear.streak = 0; btn.classList.add('bad'); var c = st.querySelector('[data-s="' + ear.cur.s + '"]'); if (c) c.classList.add('ok'); }
+    st.querySelectorAll('[data-s]').forEach(function(b){ b.disabled = true; });
+    st.querySelector('#er-fb').textContent = ok ? pick(['Yes.', 'Clean.', 'That’s the one.', 'Good ear.', 'Exactly.']) : 'It was a ' + ear.cur.n.toLowerCase() + (ear.dir < 0 ? ', going down.' : '.');
+    setTimeout(function(){ ear.busy = false; if (!ear.el) return; if (ear.round >= 10) earResult(); else earNext(); }, ok ? 800 : 1500);
+  }
+  function earResult(){
+    var st = ear.el.querySelector('#er-stage');
+    var r = ear.score >= 9 ? ['OST composer', 'Moi would hand you the boss theme.'] : ear.score >= 7 ? ['Arranger', 'You hear the shapes. Now write them down.'] : ear.score >= 4 ? ['Session player', 'Solid. A little more time with the violin.'] : ['Listener', 'Keep the headphones on — it comes with practice.'];
+    var key = 'moixhka.ear.' + ear.level, prev = +(store(key) || 0);
+    if (ear.score > prev) store(key, ear.score);
+    ear.el.querySelector('#er-best').textContent = Math.max(prev, ear.score);
+    st.innerHTML = '<div class="ear-result"><span class="g-stat">' + ear.score + ' / 10 · best streak ' + ear.best + '</span><b>' + r[0] + '</b><p class="g-note" style="margin:0 0 18px">' + r[1] + '</p><button class="g-btn red" id="er-again">Play again</button></div>';
+    st.querySelector('#er-again').onclick = function(){ earIntro(); earNext(); };
+    var c = audio(), t = c.currentTime; [60, 64, 67, 72].forEach(function(m, i){ tone({ t: t + i * .09, type: 'square', freq: mtof(m), dur: .18, vol: .13 }); });
+    refreshBests();
+  }
+  function earUnmount(){ ear.el = null; }
+
+  /* ============ 3. pentatonic pong ============ */
+  var MELODY = [69, 72, 74, 76, 79, 81, 79, 76, 74, 72, 69, 67, 64, 67, 69, 72];   // A minor pentatonic phrase
+  var pong = { cv: null, cx: null, raf: 0, run: false, W: 800, H: 500, PH: 96, PW: 14, R: 9, ball: {x:0,y:0,vx:0,vy:0}, p: {y:250,target:null}, c: {y:250}, ps: 0, cs: 0, rally: 0, best: +(store('moixhka.pong.best') || 0), note: 0, speed: 6, keys: {}, started: false, winner: null, onKey: null, onKeyUp: null };
+  function pongServe(dir){ pong.ball.x = pong.W / 2; pong.ball.y = pong.H / 2; pong.speed = 6; var a = (Math.random() * .8 - .4); pong.ball.vx = Math.cos(a) * pong.speed * dir; pong.ball.vy = Math.sin(a) * pong.speed; pong.rally = 0; pong.note = 0; }
+  function pongReset(){ pong.ps = 0; pong.cs = 0; pong.winner = null; pong.started = false; pongServe(Math.random() < .5 ? -1 : 1); pongStats(); }
+  function pongStats(){ var el = pong.cv && pong.cv.parentNode; if (!el) return; el.querySelector('#pg-ps').textContent = pong.ps; el.querySelector('#pg-cs').textContent = pong.cs; el.querySelector('#pg-r').textContent = pong.rally; el.querySelector('#pg-b').textContent = pong.best; }
+  function pongHit(){ tone({ type: 'square', freq: mtof(MELODY[pong.note % MELODY.length]), dur: .16, vol: .18, lp: 6000 }); pong.note++; pong.rally++; if (pong.rally > pong.best){ pong.best = pong.rally; store('moixhka.pong.best', pong.best); } pongStats(); }
+  function pongScore(who){
+    if (who === 'p') pong.ps++; else pong.cs++;
+    var c = audio(), t = c.currentTime, up = who === 'p';
+    tone({ t: t, type: 'triangle', freq: mtof(up ? 64 : 60), dur: .12, vol: .18 }); tone({ t: t + .12, type: 'triangle', freq: mtof(up ? 71 : 55), dur: .2, vol: .18 });
+    if (pong.ps >= 7 || pong.cs >= 7){ pong.winner = pong.ps >= 7 ? 'you' : 'cpu'; pong.started = false; }
+    pongServe(who === 'p' ? 1 : -1); pongStats(); refreshBests();
+  }
+  function pongUpdate(){
+    var b = pong.ball, P = pong.p, C = pong.c, hh = pong.PH / 2;
+    if (pong.keys.up) P.y -= 8; if (pong.keys.down) P.y += 8;
+    if (P.target != null) P.y += (P.target - P.y) * .35;
+    P.y = Math.max(hh, Math.min(pong.H - hh, P.y));
+    var aim = b.vx > 0 ? b.y + b.vy * 4 : pong.H / 2, dc = aim - C.y, mx = 5.4 + Math.min(3, pong.speed * .18);
+    C.y += Math.max(-mx, Math.min(mx, dc * .18)); C.y = Math.max(hh, Math.min(pong.H - hh, C.y));
+    if (!pong.started) return;
+    b.x += b.vx; b.y += b.vy;
+    if (b.y - pong.R < 0){ b.y = pong.R; b.vy = -b.vy; noise({ dur: .03, vol: .08, hp: 3000 }); }
+    if (b.y + pong.R > pong.H){ b.y = pong.H - pong.R; b.vy = -b.vy; noise({ dur: .03, vol: .08, hp: 3000 }); }
+    var lx = 30 + pong.PW, rx = pong.W - 30 - pong.PW;
+    if (b.vx < 0 && b.x - pong.R <= lx && b.x - pong.R >= lx + b.vx - 2 && Math.abs(b.y - P.y) <= hh + pong.R){
+      pong.speed = Math.min(15, pong.speed * 1.04); var a = ((b.y - P.y) / hh) * .95; b.vx = Math.cos(a) * pong.speed; b.vy = Math.sin(a) * pong.speed; b.x = lx + pong.R; pongHit();
+    }
+    if (b.vx > 0 && b.x + pong.R >= rx && b.x + pong.R <= rx + b.vx + 2 && Math.abs(b.y - C.y) <= hh + pong.R){
+      pong.speed = Math.min(15, pong.speed * 1.04); var a2 = ((b.y - C.y) / hh) * .95; b.vx = -Math.cos(a2) * pong.speed; b.vy = Math.sin(a2) * pong.speed; b.x = rx - pong.R; pongHit();
+    }
+    if (b.x < -pong.R * 2) pongScore('c'); else if (b.x > pong.W + pong.R * 2) pongScore('p');
+  }
+  function pongDraw(){
+    var x = pong.cx, W = pong.W, H = pong.H;
+    x.fillStyle = '#082868'; x.fillRect(0, 0, W, H);
+    x.fillStyle = 'rgba(246,239,227,.35)'; for (var y = 10; y < H; y += 26) x.fillRect(W / 2 - 4, y, 8, 8);
+    x.fillStyle = 'rgba(246,239,227,.18)'; x.font = '64px Silkscreen, monospace'; x.textAlign = 'center'; x.fillText(pong.ps, W / 2 - 90, 84); x.fillText(pong.cs, W / 2 + 90, 84);
+    x.fillStyle = '#f6efe3';
+    x.fillRect(30, pong.p.y - pong.PH / 2, pong.PW, pong.PH); x.fillRect(W - 30 - pong.PW, pong.c.y - pong.PH / 2, pong.PW, pong.PH);
+    x.shadowColor = 'rgba(200,24,40,.9)'; x.shadowBlur = 18; x.fillStyle = '#c81828'; x.beginPath(); x.arc(pong.ball.x, pong.ball.y, pong.R, 0, Math.PI * 2); x.fill(); x.shadowBlur = 0;
+    if (!pong.started){
+      x.fillStyle = '#f6efe3'; x.font = '15px Silkscreen, monospace';
+      var msg = pong.winner ? (pong.winner === 'you' ? 'YOU WIN — TAP TO PLAY AGAIN' : 'CPU WINS — TAP TO PLAY AGAIN') : 'TAP / CLICK / SPACE TO SERVE';
+      x.fillText(msg, W / 2, H / 2 + 60);
+    }
+  }
+  function pongFrame(){ if (!pong.run) return; pongUpdate(); pongDraw(); pong.raf = requestAnimationFrame(pongFrame); }
+  function pongMount(el){
+    el.innerHTML = '<div class="g-row"><span class="g-stat">You <b id="pg-ps">0</b> · CPU <b id="pg-cs">0</b></span><span class="g-stat" style="margin-left:auto">Rally <b id="pg-r">0</b> · Longest phrase <b id="pg-b">0</b></span></div><canvas class="pong" id="pg-cv" width="800" height="500" aria-label="Pentatonic pong"></canvas><p class="g-note">Move with the mouse, a finger, or ↑ ↓ / W S. Every paddle hit plays the next note of a pentatonic phrase — keep the rally alive to hear the whole melody. First to seven.</p>';
+    var cv = el.querySelector('#pg-cv'); pong.cv = cv; pong.cx = cv.getContext('2d'); pong.p.target = null; pongReset(); pong.run = true;
+    function toY(clientY){ var r = cv.getBoundingClientRect(); return (clientY - r.top) * (pong.H / r.height); }
+    function go(){ audio(); if (pong.winner) pongReset(); if (!pong.started) pong.started = true; }
+    cv.addEventListener('mousemove', function(e){ pong.p.target = toY(e.clientY); });
+    cv.addEventListener('touchmove', function(e){ e.preventDefault(); pong.p.target = toY(e.touches[0].clientY); }, { passive: false });
+    cv.addEventListener('touchstart', function(e){ pong.p.target = toY(e.touches[0].clientY); go(); }, { passive: true });
+    cv.addEventListener('click', go);
+    pong.onKey = function(e){ if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W'){ pong.keys.up = true; pong.p.target = null; e.preventDefault(); } if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S'){ pong.keys.down = true; pong.p.target = null; e.preventDefault(); } if (e.key === ' '){ go(); e.preventDefault(); } };
+    pong.onKeyUp = function(e){ if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') pong.keys.up = false; if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') pong.keys.down = false; };
+    window.addEventListener('keydown', pong.onKey); window.addEventListener('keyup', pong.onKeyUp);
+    pong.raf = requestAnimationFrame(pongFrame);
+  }
+  function pongUnmount(){ pong.run = false; cancelAnimationFrame(pong.raf); window.removeEventListener('keydown', pong.onKey); window.removeEventListener('keyup', pong.onKeyUp); pong.keys = {}; pong.cv = null; }
+
+  /* ============ window plumbing ============ */
+  var GAMES = {
+    seq:  { title: 'paper beats · 16-step chiptune sequencer', mount: seqMount,  unmount: seqUnmount },
+    ear:  { title: 'composer’s ear · name the interval',        mount: earMount,  unmount: earUnmount },
+    pong: { title: 'pentatonic pong · first to seven',          mount: pongMount, unmount: pongUnmount }
+  };
+  var gm = document.getElementById('gm'), gmBody = document.getElementById('gm-body'), gmTitle = document.getElementById('gm-title'), current = null, lastFocus = null;
+  function openGame(id){
+    if (current) closeGame();
+    current = id; gmTitle.textContent = GAMES[id].title; gmBody.innerHTML = ''; GAMES[id].mount(gmBody);
+    gm.hidden = false; document.body.style.overflow = 'hidden'; lastFocus = document.activeElement; gm.querySelector('.gm-close').focus();
+  }
+  function closeGame(){
+    if (!current) return;
+    GAMES[current].unmount(); current = null; gm.hidden = true; gmBody.innerHTML = ''; document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+    refreshBests();
+  }
+  function refreshBests(){
+    var e = document.querySelector('[data-best="ear"]'), p = document.querySelector('[data-best="pong"]'), s = document.querySelector('[data-best="seq"]');
+    var eb = ['easy','medium','hard'].map(function(l){ return +(store('moixhka.ear.' + l) || 0); });
+    if (e) e.textContent = eb.some(Boolean) ? 'Best · easy ' + eb[0] + ' / medium ' + eb[1] + ' / hard ' + eb[2] : '';
+    var pb = +(store('moixhka.pong.best') || 0); if (p) p.textContent = pb ? 'Longest phrase · ' + pb + ' notes' : '';
+    if (s) s.textContent = store('moixhka.seq.shared') ? 'You’ve shared a loop' : '';
+  }
+  document.querySelectorAll('[data-game]').forEach(function(b){ b.addEventListener('click', function(){ audio(); openGame(b.dataset.game); }); });
+  gm.querySelector('.gm-close').addEventListener('click', closeGame);
+  gm.addEventListener('click', function(e){ if (e.target === gm) closeGame(); });
+  window.addEventListener('keydown', function(e){ if (e.key === 'Escape' && current) closeGame(); });
+  refreshBests();
+  if (/#seq=[0-9a-f]{32}/i.test(location.hash)){ document.getElementById('bored').scrollIntoView(); openGame('seq'); }
 })();
 </script>
 </body>
